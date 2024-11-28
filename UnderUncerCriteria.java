@@ -109,14 +109,6 @@ public class UnderUncerCriteria {
             System.out.print(i + " ");
         }
 
-        // System.out.println(
-        // "\nBest alternative according to maximax is: " + alts.get(rowmm) + " - " +
-        // stateofNature.get(colmm) + ": " + maxNumber);
-        // System.out.println("Best alternative according to maximin is: " +
-        // alts.get(rowmmi) + " - "
-        // + stateofNature.get(colmmi) + ": " +
-        // maxNumber2);
-
     }
 
 }
