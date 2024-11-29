@@ -2,12 +2,10 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class UnderUncerCriteria {
+
     public static void main(String[] args) {
-        // Declare array of strings for alternatives and states of nature
         ArrayList<String> alts, stateofNature;
         int[][] values;
-        double coefficient = .8;
-
         Scanner in = new Scanner(System.in);
 
         alts = new ArrayList<>();
@@ -15,100 +13,129 @@ public class UnderUncerCriteria {
         String alt, son;
         int altNumber = 1;
 
-        System.out.println("Enter alternatives names - one by time (e) to exit");
+        System.out.println("Enter alternatives names - one at a time (e to exit):");
         do {
-            System.out.print("Please enter alternative number " + altNumber++ + ": ");
+            System.out.print("Alternative " + altNumber++ + ": ");
             alt = in.nextLine();
-            if (alt.charAt(0) != 'e')
-                alts.add(alt);
-        } while (alt.charAt(0) != 'e');
+            if (!alt.equalsIgnoreCase("e")) alts.add(alt);
+        } while (!alt.equalsIgnoreCase("e"));
 
         altNumber = 1;
-        System.out.println("Enter state of nature names one by time (e) to exit");
+        System.out.println("Enter state of nature names - one at a time (e to exit):");
         do {
-            System.out.print("Please enter state of nature number " + altNumber++ + ": ");
+            System.out.print("State of Nature " + altNumber++ + ": ");
             son = in.nextLine();
-            if (son.charAt(0) != 'e')
-                stateofNature.add(son);
-        } while (son.charAt(0) != 'e');
+            if (!son.equalsIgnoreCase("e")) stateofNature.add(son);
+        } while (!son.equalsIgnoreCase("e"));
 
         values = new int[alts.size()][stateofNature.size()];
 
-        // Assign value of each alt
+        System.out.println("Enter payoff values for each alternative and state of nature:");
         for (int row = 0; row < alts.size(); row++) {
             for (int col = 0; col < stateofNature.size(); col++) {
-                System.out.printf("Enter value of alt: %s - state of nature: %s : ", alts.get(row),
-                        stateofNature.get(col));
+                System.out.printf("Payoff for %s under %s: ", alts.get(row), stateofNature.get(col));
                 values[row][col] = in.nextInt();
             }
         }
 
         // Maximax
-        int maxNumber = Integer.MIN_VALUE;
-        int rowmm = 0, colmm = 0;
-        // get the lowest number in the first row
-        for (int i = 0; i < alts.size(); i++) {
-            for (int k = 0; k < stateofNature.size(); k++) {
-                if (values[i][k] > maxNumber) {
-                    maxNumber = values[i][k];
-                    rowmm = i;
-                    colmm = k;
+        int maxPayoff = Integer.MIN_VALUE;
+        String maximaxAlt = "";
+        for (int row = 0; row < alts.size(); row++) {
+            int maxInRow = Integer.MIN_VALUE;
+            for (int col = 0; col < stateofNature.size(); col++) {
+                if (values[row][col] > maxInRow) {
+                    maxInRow = values[row][col];
                 }
             }
+            if (maxInRow > maxPayoff) {
+                maxPayoff = maxInRow;
+                maximaxAlt = alts.get(row);
+            }
         }
+        System.out.println("\nMaximax: " + maximaxAlt + " with payoff " + maxPayoff);
 
         // Maximin
-        int minNumber = Integer.MAX_VALUE;
-        int rowmmi = 0, colmmi = 0;
-        ArrayList<Integer> rowsMinNumbers = new ArrayList<>();
-        for (int i = 0; i < alts.size(); i++) {
-            for (int k = 0; k < stateofNature.size(); k++) {
-                if (values[i][k] < minNumber) {
-                    rowmmi = i;
-                    colmmi = k;
-                    minNumber = values[i][k];
+        int maxMinPayoff = Integer.MIN_VALUE;
+        String maximinAlt = "";
+        for (int row = 0; row < alts.size(); row++) {
+            int minInRow = Integer.MAX_VALUE;
+            for (int col = 0; col < stateofNature.size(); col++) {
+                if (values[row][col] < minInRow) {
+                    minInRow = values[row][col];
                 }
             }
-            rowsMinNumbers.add(minNumber);
-            minNumber = Integer.MAX_VALUE;
-        }
-
-        int maxNumber2 = Integer.MIN_VALUE;
-        for (int i : rowsMinNumbers) {
-            if (i > maxNumber2) {
-                maxNumber2 = i;
+            if (minInRow > maxMinPayoff) {
+                maxMinPayoff = minInRow;
+                maximinAlt = alts.get(row);
             }
         }
+        System.out.println("Maximin: " + maximinAlt + " with payoff " + maxMinPayoff);
 
-        int[] minNumbersInTheRows = new int[alts.size()];
-        int[] maxNumbersInTheRows = new int[alts.size()];
-        int minNumber3 = Integer.MAX_VALUE;
-        int maxNumber3 = Integer.MIN_VALUE;
-        for (int i = 0; i < alts.size(); i++) {
-            for (int k = 0; k < stateofNature.size(); k++) {
-                if (values[i][k] != 0) {
-                    if (values[i][k] < minNumber3) {
-                        minNumbersInTheRows[i] = values[i][k];
-                        // minNumber3 = values[i][k];
-                    }
-                    if (values[i][k] > maxNumber3) {
-                        maxNumbersInTheRows[i] = values[i][k];
-                    }
-                } else {
-                    minNumbersInTheRows[i] = 0;
-                    maxNumbersInTheRows[i] = 0;
+        // Criterion of Realism (Hurwicz)
+        System.out.print("\nEnter coefficient of realism (0 to 1): ");
+        double alpha = in.nextDouble();
+        double highestHurwiczValue = Double.MIN_VALUE;
+        String hurwiczAlt = "";
+        for (int row = 0; row < alts.size(); row++) {
+            int maxInRow = Integer.MIN_VALUE;
+            int minInRow = Integer.MAX_VALUE;
+            for (int col = 0; col < stateofNature.size(); col++) {
+                if (values[row][col] > maxInRow) maxInRow = values[row][col];
+                if (values[row][col] < minInRow) minInRow = values[row][col];
+            }
+            double weightedAvg = alpha * maxInRow + (1 - alpha) * minInRow;
+            if (weightedAvg > highestHurwiczValue) {
+                highestHurwiczValue = weightedAvg;
+                hurwiczAlt = alts.get(row);
+            }
+        }
+        System.out.println("Hurwicz Criterion: " + hurwiczAlt + " with weighted average " + highestHurwiczValue);
+
+        // Equally Likely (Laplace)
+        double highestLaplaceValue = Double.MIN_VALUE;
+        String laplaceAlt = "";
+        for (int row = 0; row < alts.size(); row++) {
+            double avg = 0;
+            for (int col = 0; col < stateofNature.size(); col++) {
+                avg += values[row][col];
+            }
+            avg /= stateofNature.size();
+            if (avg > highestLaplaceValue) {
+                highestLaplaceValue = avg;
+                laplaceAlt = alts.get(row);
+            }
+        }
+        System.out.println("Laplace Criterion: " + laplaceAlt + " with average payoff " + highestLaplaceValue);
+
+        // Minimax Regret
+        int[][] regretTable = new int[alts.size()][stateofNature.size()];
+        for (int col = 0; col < stateofNature.size(); col++) {
+            int maxInColumn = Integer.MIN_VALUE;
+            for (int row = 0; row < alts.size(); row++) {
+                if (values[row][col] > maxInColumn) {
+                    maxInColumn = values[row][col];
                 }
             }
+            for (int row = 0; row < alts.size(); row++) {
+                regretTable[row][col] = maxInColumn - values[row][col];
+            }
         }
 
-        for (int i : minNumbersInTheRows) {
-            System.out.print(i + " ");
+        int minMaxRegret = Integer.MAX_VALUE;
+        String minimaxRegretAlt = "";
+        for (int row = 0; row < alts.size(); row++) {
+            int maxRegret = Integer.MIN_VALUE;
+            for (int col = 0; col < stateofNature.size(); col++) {
+                if (regretTable[row][col] > maxRegret) {
+                    maxRegret = regretTable[row][col];
+                }
+            }
+            if (maxRegret < minMaxRegret) {
+                minMaxRegret = maxRegret;
+                minimaxRegretAlt = alts.get(row);
+            }
         }
-        System.out.println();
-        for (int i : maxNumbersInTheRows) {
-            System.out.print(i + " ");
-        }
-
+        System.out.println("Minimax Regret: " + minimaxRegretAlt + " with regret " + minMaxRegret);
     }
-
 }
