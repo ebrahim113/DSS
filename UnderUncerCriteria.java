@@ -39,7 +39,7 @@ public class UnderUncerCriteria {
                 values[row][col] = in.nextInt();
             }
         }
-
+        int altIndex = 0, sonIndex = 0;
         do {
             System.out.println(
                     "[1] Maximax (optimistic)\n[2] Maximin (pessimistic)\n[3] Criterion of realism (Hurwicz)\n[4] Equally likely (Laplace)\n[5] Minimax regret");
@@ -49,39 +49,47 @@ public class UnderUncerCriteria {
                 case 1: {
                     // Maximax
                     int maxPayoff = Integer.MIN_VALUE;
-                    String maximaxAlt = "";
+                    String maximaxAlt = "", maximaxSON = "";
                     for (int row = 0; row < alts.size(); row++) {
                         int maxInRow = Integer.MIN_VALUE;
                         for (int col = 0; col < stateofNature.size(); col++) {
                             if (values[row][col] > maxInRow) {
                                 maxInRow = values[row][col];
+                                altIndex = row;
+                                sonIndex = col;
                             }
                         }
                         if (maxInRow > maxPayoff) {
                             maxPayoff = maxInRow;
-                            maximaxAlt = alts.get(row);
+                            maximaxAlt = alts.get(altIndex);
+                            maximaxSON = stateofNature.get(sonIndex);
                         }
                     }
-                    System.out.println("\nMaximax: " + maximaxAlt + " with payoff " + maxPayoff + "\n");
+                    System.out.println(
+                            "\nMaximax: " + maximaxAlt + " - " + maximaxSON + " with payoff " + maxPayoff + "\n");
                     break;
                 }
                 case 2: {
                     // Maximin
                     int maxMinPayoff = Integer.MIN_VALUE;
-                    String maximinAlt = "";
+                    String maximinAlt = "", maximinSON = "";
                     for (int row = 0; row < alts.size(); row++) {
                         int minInRow = Integer.MAX_VALUE;
                         for (int col = 0; col < stateofNature.size(); col++) {
                             if (values[row][col] < minInRow) {
                                 minInRow = values[row][col];
+                                altIndex = row;
+                                sonIndex = col;
                             }
                         }
                         if (minInRow > maxMinPayoff) {
                             maxMinPayoff = minInRow;
-                            maximinAlt = alts.get(row);
+                            maximinAlt = alts.get(altIndex);
+                            maximinSON = stateofNature.get(sonIndex);
                         }
                     }
-                    System.out.println("\nMaximin: " + maximinAlt + " with payoff " + maxMinPayoff + "\n");
+                    System.out.println(
+                            "\nMaximin: " + maximinAlt + " - " + maximinSON + " with payoff " + maxMinPayoff + "\n");
                     break;
                 }
                 case 3: {
